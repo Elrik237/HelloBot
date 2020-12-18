@@ -26,6 +26,14 @@ from telegram.ext import MessageHandler, Filters
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 dispatcher.add_handler(echo_handler)
 
+import datetime
+def time_now(update, context):
+    t = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+    context.bot.send_message(chat_id=update.effective_chat.id, text=t)
+
+time_now_handler = CommandHandler('time_now', time_now)
+dispatcher.add_handler(time_now_handler)
+
 def caps(update, context):
     text_caps = ' '.join(context.args).upper()
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
@@ -58,8 +66,6 @@ def unknown(update, context):
 unknown_handler = MessageHandler(Filters.command, unknown)
 dispatcher.add_handler(unknown_handler)
 
-updater.stop()
+updater.start_polling()
 
 
-import datetime
-print(datetime.datetime.today().strftime('%m/%d/%Y %H:%M'))
