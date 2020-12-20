@@ -34,22 +34,6 @@ def time_now(update, context):
 time_now_handler = CommandHandler('time_now', time_now)
 dispatcher.add_handler(time_now_handler)
 
-from telegram import InlineQueryResultArticle, InputTextMessageContent
-def inline_time_now(update, context):
-    time = update.inline_time_now.time
-    if not time:
-        return
-    results = list()
-    results.append(
-        InlineQueryResultArticle(id=time.upper(), title='time_now',
-            input_message_content=InputTextMessageContent(time.upper())
-        )
-    )
-    context.bot.answer_inline_query(update.inline_time.id, results)
-
-from telegram.ext import InlineQueryHandler
-inline_time_now_handler = InlineQueryHandler(inline_time_now)
-dispatcher.add_handler(inline_time_now_handler)
 
 def caps(update, context):
     text_caps = ' '.join(context.args).upper()
@@ -65,7 +49,9 @@ def inline_caps(update, context):
         return
     results = list()
     results.append(
-        InlineQueryResultArticle(id=query.upper(), title='Caps',
+        InlineQueryResultArticle(
+            id=query.upper(),
+            title='Caps',
             input_message_content=InputTextMessageContent(query.upper())
         )
     )
