@@ -20,7 +20,8 @@ dispatcher.add_handler(start_handler)
 
 
 def echo(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+    time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text + ' ' + time)
 
 from telegram.ext import MessageHandler, Filters
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
@@ -48,7 +49,7 @@ def inline_caps(update, context):
     if not query:
         return
     results = list()
-    results.append(
+    results.append( 
         InlineQueryResultArticle(
             id=query.upper(),
             title='Caps',
