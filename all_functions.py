@@ -8,7 +8,9 @@ else:
     print('Нужен token_bot. Добавь его или не буду работать!')
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                     level=logging.INFO)
+                     level=logging.DEBUG, filename='myapp.log')
+logger = logging.getLogger(__name__)
+
 
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Привет, я бот и только начинаю "
