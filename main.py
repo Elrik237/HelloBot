@@ -5,16 +5,25 @@ from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 import logging
 import datetime
+import os
 
-bot = telegram.Bot(token='1440425473:AAGgDLB3-dihOgOagG5mVfktEzJVhWEDc0g')
+if os.environ.get('token_bot'):
+    print('Погнали!')
+else:
+    print('Нужен token_bot. Добавь его или не буду работать!')
 
 
-updater = Updater(token='1440425473:AAGgDLB3-dihOgOagG5mVfktEzJVhWEDc0g', use_context=True)
+bot = telegram.Bot(token=os.environ['token_bot'])
+
+
+updater = Updater(token=os.environ['token_bot'], use_context=True)
 dispatcher = updater.dispatcher
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)
+
+
 
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Привет, я бот и только начинаю "
