@@ -7,8 +7,13 @@ if os.environ.get('token_bot'):
 else:
     print('Нужен token_bot. Добавь его или не буду работать!')
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                     level=logging.DEBUG, filename='myapp.log')
+
+file_log    = logging.FileHandler('myapp.log')
+console_out = logging.StreamHandler()
+
+logging.basicConfig(handlers=(file_log, console_out),
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
