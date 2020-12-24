@@ -1,6 +1,9 @@
 import telegram
 from telegram.ext import InlineQueryHandler, MessageHandler, Filters
-import logging, datetime,os
+import datetime, os
+import my_logging
+logger = my_logging.get_logger(__name__)
+
 
 if os.environ.get('token_bot'):
     print('Погнали!')
@@ -8,13 +11,6 @@ else:
     print('Нужен token_bot. Добавь его или не буду работать!')
 
 
-file_log    = logging.FileHandler('myapp.log')
-console_out = logging.StreamHandler()
-
-logging.basicConfig(handlers=(file_log, console_out),
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 
 def start(update, context):
@@ -22,14 +18,19 @@ def start(update, context):
                                                                     "развиваться. В будущем я захвачу "
                                                                     "человечество!!!")
 
+
+
 time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+
 
 def echo(update, context):
     time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
     context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text + ' ' + time)
 
+
 def time_now(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=time)
+
 
 def inline_time_now(update, context):
     query = update.inline_query.query
@@ -45,16 +46,13 @@ def inline_time_now(update, context):
     )
     context.bot.answer_inline_query(update.inline_query.id, results)
 
+
 def caps(update, context):
     text_caps = ' '.join(context.args).upper()
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
 
+
 def unknown(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
-
-
-
-
-
 
 

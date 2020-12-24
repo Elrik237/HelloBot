@@ -1,20 +1,30 @@
 from telegram.ext import Updater, CommandHandler,InlineQueryHandler, MessageHandler, Filters
-from all_functions import start, time_now, caps, echo, unknown, inline_time_now
 import os
+import all_functions
+
+import my_logging
+logger = my_logging.get_logger(__name__)
+
+
+
 
 def main():
+
+
     updater = Updater(token=os.environ['token_bot'], use_context=True)
     dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('time_now', time_now))
-    dispatcher.add_handler(CommandHandler('caps', caps))
-    dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
-    dispatcher.add_handler(MessageHandler(Filters.command, unknown))
-    dispatcher.add_handler(InlineQueryHandler(inline_time_now))
+    dispatcher.add_handler(CommandHandler('start', all_functions.start))
+    dispatcher.add_handler(CommandHandler('time_now', all_functions.time_now))
+    dispatcher.add_handler(CommandHandler('caps', all_functions.caps))
+    dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), all_functions.echo))
+    dispatcher.add_handler(MessageHandler(Filters.command, all_functions.unknown))
+    dispatcher.add_handler(InlineQueryHandler(all_functions.inline_time_now))
 
     updater.start_polling()
     updater.idle()
 
 if __name__ == '__main__':
+    logger.info("Программа стартует")
     main()
+    logger.info("Программа закончилась")
