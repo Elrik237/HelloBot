@@ -14,8 +14,8 @@ def get_stream_handler():
     stream_handler.setFormatter(logging.Formatter(_log_format))
     return stream_handler
 
-def get_logger(__name__):
-    logger = logging.getLogger(__name__)
+def get_logger(name):
+    logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     logger.addHandler(get_file_handler())
     logger.addHandler(get_stream_handler())

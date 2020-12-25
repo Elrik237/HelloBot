@@ -1,16 +1,12 @@
 from telegram.ext import Updater, CommandHandler,InlineQueryHandler, MessageHandler, Filters
-import os
-import all_functions
+import os, all_functions, my_logging
 
-import my_logging
 logger = my_logging.get_logger(__name__)
 
 
 
 
 def main():
-
-
     updater = Updater(token=os.environ['token_bot'], use_context=True)
     dispatcher = updater.dispatcher
 
@@ -25,6 +21,5 @@ def main():
     updater.idle()
 
 if __name__ == '__main__':
-    logger.info("Программа стартует")
+    my_logging.get_logger(__name__)
     main()
-    logger.info("Программа закончилась")
