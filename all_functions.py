@@ -2,6 +2,7 @@ from telegram import InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import InlineQueryHandler, MessageHandler, Filters
 import datetime, os
 import my_logging
+from statistics import collection_id, inline_collection_id
 
 logger = my_logging.get_logger(__name__)
 
@@ -16,9 +17,15 @@ else:
 
 
 def start(update, context):
+    collection_id(update)
+    logger.debug(f'Пользователь {update.message.chat.username}, '
+                 f'chat_id = {update.message.chat.id}, '
+                 f'Выполнена функция - start, '
+                 f'текст_сообщения = {update.message.text}')
     context.bot.send_message(chat_id=update.effective_chat.id, text="Привет, я бот и только начинаю "
                                                                     "развиваться. В будущем я захвачу "
                                                                     "человечество!!!")
+
 
 
 
@@ -26,6 +33,7 @@ time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
 
 
 def echo(update, context):
+    collection_id(update)
     time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
@@ -35,6 +43,7 @@ def echo(update, context):
 
 
 def time_now(update, context):
+    collection_id(update)
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
                  f'Выполнена функция - time_now, '
@@ -43,6 +52,7 @@ def time_now(update, context):
 
 
 def inline_time_now(update, context):
+    inline_collection_id(update)
     query = update.inline_query.query
     logger.debug(f'Пользователь {update.inline_query.from_user.username}, '
                  f'chat_id = {update.inline_query.from_user.id}, '
@@ -62,6 +72,7 @@ def inline_time_now(update, context):
 
 
 def caps(update, context):
+    collection_id(update)
     text_caps = ' '.join(context.args).upper()
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
@@ -71,6 +82,7 @@ def caps(update, context):
 
 
 def unknown(update, context):
+    collection_id(update)
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
                  f'Выполнена функция - unknown, '
