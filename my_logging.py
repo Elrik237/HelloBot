@@ -3,7 +3,7 @@ import logging
 _log_format = f"%(asctime)s - [%(levelname)s] - %(name)s - %(message)s"
 
 def get_file_handler():
-    file_handler = logging.FileHandler("file.log")
+    file_handler = logging.FileHandler("file.log", 'w')
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(logging.Formatter(_log_format))
     return file_handler
