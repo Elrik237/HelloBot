@@ -20,8 +20,7 @@ def collection_id(update):
     if user_id not in dict_users:
         dict_users[user_id] = user
         with open('file_users.txt', 'a') as out:
-            for key, val in dict_users.items():
-                out.write('{}:{}\n'.format(key, val))
+            out.write('{}:{}\n'.format(user_id, user))
 
 def inline_collection_id(update):
     inline_user = update.inline_query.from_user.username
@@ -29,8 +28,7 @@ def inline_collection_id(update):
     if inline_user_id not in dict_users:
         dict_users[inline_user_id] = inline_user
         with open('file_users.txt', 'a') as out:
-            for key, val in dict_users.items():
-                out.write('{}:{}\n'.format(key, val))
+            out.write('{}:{}\n'.format(inline_user_id, inline_user))
 
 
 def stat (update, context):
