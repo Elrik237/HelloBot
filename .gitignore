@@ -131,3 +131,4 @@ dmypy.json
 .idea/vcs.xml
 .idea/encodings.xml
 file_users.txt
+stat_users.txt
