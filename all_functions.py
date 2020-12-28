@@ -22,9 +22,18 @@ def start(update, context):
                  f'chat_id = {update.message.chat.id}, '
                  f'Выполнена функция - start, '
                  f'текст_сообщения = {update.message.text}')
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Привет, я бот и только начинаю "
-                                                                    "развиваться. В будущем я захвачу "
-                                                                    "человечество!!!")
+    text = "%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n" % ("Привет, я бот который только начинает развиваться!",
+                                                    "Если не использовать команды ниже, "
+                                                    "я буду просто повторять Ваше сообщение(",
+                                                    "",
+                                                    "Команда /time_now покажет текущуюю дату и время.",
+                                                    "Команда /caps вернет Ваше сообщенем капсом.",
+                                                    "",
+                                                    "Еще есть команда, которая покажет статистику "
+                                                    "по этому боту, но я Вам не скажу)",
+                                                    "",
+                                                    "По вопросам пишите @Elrik237")
+    context.bot.send_message(chat_id=update.effective_chat.id, text= text)
 
 
 
