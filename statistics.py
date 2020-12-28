@@ -31,13 +31,16 @@ def inline_collection_id(update):
             out.write('{}:{}\n'.format(inline_user_id, inline_user))
 
 
+
 def stat (update, context):
+    lens_user = []
     collection_id(update)
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
                  f'Выполнена функция - stat, '
                  f'текст_сообщения = {update.message.text}')
-    context.bot.send_message(
-        chat_id=update.effective_chat.id, text=f'Количество уникальных пользователей: {len(dict_users)}')
     for k in dict_users:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=f'{k} : {dict_users[k]}')
+        lens_user += f'{k} : {dict_users[k]}\n'
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=f'Количество уникальных пользователей: {len(dict_users)}\n '
+                                               f"{''.join(lens_user)}")
