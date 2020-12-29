@@ -1,12 +1,11 @@
 from telegram import InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import InlineQueryHandler, MessageHandler, Filters
-import datetime, os
+import os
+import datetime
 import my_logging
-from statistics import statistic_updata, inline_statistic_updata
+from statistics import Statistic
 
 logger = my_logging.get_logger(__name__)
-
-
 
 if os.environ.get('token_bot'):
     logger.info('Погнали!')
@@ -14,35 +13,31 @@ else:
     logger.info('Нужен token_bot. Добавь его или не буду работать!')
 
 
-
-
 def start(update, context):
-    statistic_updata(update)
+    Statistic().statistic_updata(update)
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
                  f'Выполнена функция - start, '
                  f'текст_сообщения = {update.message.text}')
     text = "%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n" % ("Привет, я бот который только начинает развиваться!",
-                                                    "Если не использовать команды ниже, "
-                                                    "я буду просто повторять Ваше сообщение(",
-                                                    "",
-                                                    "Команда /time_now покажет текущуюю дату и время.",
-                                                    "Команда /caps вернет Ваше сообщенем капсом.",
-                                                    "",
-                                                    "Еще есть команда, которая покажет статистику "
-                                                    "по этому боту, но я Вам не скажу)",
-                                                    "",
-                                                    "По вопросам пишите @Elrik237")
-    context.bot.send_message(chat_id=update.effective_chat.id, text= text)
-
-
+                                                              "Если не использовать команды ниже, "
+                                                              "я буду просто повторять Ваше сообщение(",
+                                                              "",
+                                                              "Команда /time_now покажет текущуюю дату и время.",
+                                                              "Команда /caps вернет Ваше сообщенем капсом.",
+                                                              "",
+                                                              "Еще есть команда, которая покажет статистику "
+                                                              "по этому боту, но я Вам не скажу)",
+                                                              "",
+                                                              "По вопросам пишите @Elrik237")
+    context.bot.send_message(chat_id=update.effective_chat.id, text=text)
 
 
 time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
 
 
 def echo(update, context):
-    statistic_updata(update)
+    Statistic().statistic_updata(update)
     time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
@@ -52,7 +47,7 @@ def echo(update, context):
 
 
 def time_now(update, context):
-    statistic_updata(update)
+    Statistic().statistic_updata(update)
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
                  f'Выполнена функция - time_now, '
@@ -61,7 +56,7 @@ def time_now(update, context):
 
 
 def inline_time_now(update, context):
-    inline_statistic_updata(update)
+    Statistic().inline_statistic_updata(update)
     query = update.inline_query.query
     logger.debug(f'Пользователь {update.inline_query.from_user.username}, '
                  f'chat_id = {update.inline_query.from_user.id}, '
@@ -81,7 +76,7 @@ def inline_time_now(update, context):
 
 
 def caps(update, context):
-    statistic_updata(update)
+    Statistic().statistic_updata(update)
     text_caps = ' '.join(context.args).upper()
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
@@ -91,11 +86,9 @@ def caps(update, context):
 
 
 def unknown(update, context):
-    statistic_updata(update)
+    Statistic().statistic_updata(update)
     logger.debug(f'Пользователь {update.message.chat.username}, '
                  f'chat_id = {update.message.chat.id}, '
                  f'Выполнена функция - unknown, '
                  f'текст_сообщения = {update.message.text}')
     context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
-
-
