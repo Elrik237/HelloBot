@@ -134,3 +134,7 @@ file_users.txt
 stat_users.txt
 file_users.json
 stat_users.json
+.idea/modules.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/HelloBot.iml
+.idea/misc.xml

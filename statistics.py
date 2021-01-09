@@ -1,8 +1,7 @@
-from telegram import InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import InlineQueryHandler, MessageHandler, Filters
 import os.path
 import my_logging
 import json
+from chatbase import Message
 
 
 class Statistic:
@@ -24,6 +23,18 @@ class Statistic:
     else:
         with open('stat_users.json', 'w') as out:
             json.dump(stat_users, out)
+
+    def chatbase(self, update, f):
+        user_id = str(update.message.chat.id)
+        text = update.message.text
+
+        msg = Message(api_key=os.environ['token_chatbase'],
+                      platform="Telegram",
+                      version="0.1",
+                      user_id=f"{user_id}",
+                      message=f"{text}",
+                      intent=f"{f}")
+        msg.send()
 
     def statistic_updata(self, update):
         user = update.message.chat.username
@@ -72,7 +83,9 @@ class Statistic:
             json.dump(Statistic.stat_users, out)
 
     def stat(self, update, context):
+        f = 'stat'
         Statistic().statistic_updata(update)
+        Statistic().chatbase(update, f)
         lens_user = []
         for k in Statistic.dict_users:
             lens_user += f'{k} : {Statistic.dict_users[k]}, Количество запросов {Statistic.stat_users[k]}\n'
