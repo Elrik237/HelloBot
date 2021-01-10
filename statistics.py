@@ -4,11 +4,8 @@ import json
 from chatbase import Message
 
 
-class Statistic:
-    logger = my_logging.get_logger(__name__)
-
+class Datebase:
     dict_users = {}
-    stat_users = {}
 
     if os.path.exists('file_users.json'):
         with open('file_users.json', 'r') as inp:
@@ -17,16 +14,19 @@ class Statistic:
         with open('file_users.json', 'w') as out:
             json.dump(dict_users, out)
 
-    if os.path.exists('stat_users.json'):
-        with open('stat_users.json', 'r') as inp:
-            stat_users = json.load(inp)
-    else:
-        with open('stat_users.json', 'w') as out:
-            json.dump(stat_users, out)
 
-    def chatbase(self, update, f):
+class Statistic:
+    logger = my_logging.get_logger(__name__)
+
+
+    def statistic_updata(self, update, f):
+        user = update.message.chat.username
         user_id = str(update.message.chat.id)
         text = update.message.text
+        Statistic.logger.debug(f'Пользователь {user}, '
+                               f'chat_id = {user_id}, '
+                               f'Выполнена функция - {f}, '
+                               f'текст_сообщения = {text}')
 
         msg = Message(api_key=os.environ['token_chatbase'],
                       platform="Telegram",
@@ -36,59 +36,51 @@ class Statistic:
                       intent=f"{f}")
         msg.send()
 
-    def statistic_updata(self, update):
-        user = update.message.chat.username
-        user_id = str(update.message.chat.id)
-        text = update.message.text
-
-        Statistic.logger.debug(f'Пользователь {user}, '
-                               f'chat_id = {user_id}, '
-                               f'Выполнена функция - stat, '
-                               f'текст_сообщения = {text}')
-
-        if user_id not in Statistic.dict_users:
-            Statistic.dict_users[user_id] = user
-        with open('file_users.json', 'w') as out:
-            json.dump(Statistic.dict_users, out)
-
-        if user_id not in Statistic.stat_users:
-            quantity_messages = 1
-            Statistic.stat_users[user_id] = quantity_messages
+        if user_id not in Datebase.dict_users:
+            Datebase.dict_users[user_id] = [user, 1]
         else:
-            quantity_messages = int(Statistic.stat_users[user_id])
+            quantity_messages = Datebase.dict_users[user_id][1]
             quantity_messages += 1
-            Statistic.stat_users[user_id] = quantity_messages
+            Datebase.dict_users[user_id] = [user, quantity_messages]
 
-        with open('stat_users.json', 'w') as out:
-            json.dump(Statistic.stat_users, out)
+        with open('file_users.json', 'w') as out:
+            json.dump(Datebase.dict_users, out)
 
-    def inline_statistic_updata(self, update):
+    def inline_statistic_updata(self, update, f):
         inline_user = update.inline_query.from_user.username
         inline_user_id = str(update.inline_query.from_user.id)
+        query = update.inline_query.query
+        Statistic.logger.debug(f'Пользователь {inline_user}, '
+                               f'chat_id = {inline_user_id}, '
+                               f'Выполнена функция - {f}, '
+                               f'текст_сообщения = {query}')
 
-        if inline_user_id not in Statistic.dict_users:
-            Statistic.dict_users[inline_user_id] = inline_user
-            with open('file_users.json', 'a') as out:
-                json.dump(Statistic.dict_users, out)
+        msg = Message(api_key=os.environ['token_chatbase'],
+                      platform="Telegram",
+                      version="0.1",
+                      user_id=f"{inline_user_id}",
+                      message=f"{query}",
+                      intent=f"{f}")
+        msg.send()
 
-        if inline_user_id not in stat_users:
-            quantity_messages = 1
-            Statistic.stat_users[inline_user_id] = quantity_messages
+        if inline_user_id not in Datebase.dict_users:
+            Datebase.dict_users[inline_user_id] = [inline_user, 1]
         else:
-            quantity_messages = int(stat_users[inline_user_id])
+            quantity_messages = int(Datebase.dict_users[inline_user_id][1])
             quantity_messages += 1
-            Statistic.stat_users[inline_user_id] = quantity_messages
+            Datebase.dict_users[inline_user_id] = [inline_user, quantity_messages]
 
-        with open('stat_users.json', 'w') as out:
-            json.dump(Statistic.stat_users, out)
+        with open('file_users.json', 'w') as out:
+            json.dump(Datebase.dict_users, out)
 
     def stat(self, update, context):
         f = 'stat'
-        Statistic().statistic_updata(update)
-        Statistic().chatbase(update, f)
+        Statistic().statistic_updata(update, f)
         lens_user = []
-        for k in Statistic.dict_users:
-            lens_user += f'{k} : {Statistic.dict_users[k]}, Количество запросов {Statistic.stat_users[k]}\n'
+        for k in Datebase.dict_users:
+            lens_user += f'{k} : {Datebase.dict_users[k][0]}, Количество запросов {Datebase.dict_users[k][1]}\n'
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text=f'Количество уникальных пользователей: {len(Statistic.dict_users)}\n'
-                                                   f"{''.join(lens_user)}")
+            chat_id=update.effective_chat.id,
+            text=f'Количество уникальных пользователей: {len(Datebase.dict_users)}\n'
+                 f"{''.join(lens_user)}"
+        )

@@ -15,12 +15,7 @@ else:
 
 def start(update, context):
     f = 'start'
-    Statistic().statistic_updata(update)
-    Statistic().chatbase(update, f)
-    logger.debug(f'Пользователь {update.message.chat.username}, '
-                 f'chat_id = {update.message.chat.id}, '
-                 f'Выполнена функция - {f}, '
-                 f'текст_сообщения = {update.message.text}')
+    Statistic().statistic_updata(update, f)
     text = "%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n" % ("Привет, я бот который только начинает развиваться!",
                                                               "Если не использовать команды ниже, "
                                                               "я буду просто повторять Ваше сообщение(",
@@ -40,35 +35,20 @@ time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
 
 def echo(update, context):
     f = 'echo'
-    Statistic().statistic_updata(update)
-    Statistic().chatbase(update, f)
-    logger.debug(f'Пользователь {update.message.chat.username}, '
-                 f'chat_id = {update.message.chat.id}, '
-                 f'Выполнена функция - {f}, '
-                 f'текст_сообщения = {update.message.text}')
+    Statistic().statistic_updata(update, f)
     context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text + ' ' + time)
 
 
 def time_now(update, context):
     f = 'time_now'
-    Statistic().statistic_updata(update)
-    Statistic().chatbase(update, f)
-    logger.debug(f'Пользователь {update.message.chat.username}, '
-                 f'chat_id = {update.message.chat.id}, '
-                 f'Выполнена функция - {f}, '
-                 f'текст_сообщения = {update.message.text}')
+    Statistic().statistic_updata(update, f)
     context.bot.send_message(chat_id=update.effective_chat.id, text=time)
 
 
 def inline_time_now(update, context):
     f = 'inlin_time_now'
-    Statistic().statistic_updata(update)
-    Statistic().chatbase(update, f)
+    Statistic().inline_statistic_updata(update, f)
     query = update.inline_query.query
-    logger.debug(f'Пользователь {update.inline_query.from_user.username}, '
-                 f'chat_id = {update.inline_query.from_user.id}, '
-                 f'Выполнена функция - {f}, '
-                 f'текст_сообщения = {update.inline_query.query}')
     if not query:
         return
     results = list()
@@ -84,22 +64,12 @@ def inline_time_now(update, context):
 
 def caps(update, context):
     f = 'caps'
-    Statistic().statistic_updata(update)
-    Statistic().chatbase(update, f)
+    Statistic().statistic_updata(update, f)
     text_caps = ' '.join(context.args).upper()
-    logger.debug(f'Пользователь {update.message.chat.username}, '
-                 f'chat_id = {update.message.chat.id}, '
-                 f'Выполнена функция - {f}, '
-                 f'текст_сообщения = {update.message.text}')
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
 
 
 def unknown(update, context):
     f = 'unknown'
-    Statistic().statistic_updata(update)
-    Statistic().chatbase(update, f)
-    logger.debug(f'Пользователь {update.message.chat.username}, '
-                 f'chat_id = {update.message.chat.id}, '
-                 f'Выполнена функция - {f}, '
-                 f'текст_сообщения = {update.message.text}')
+    Statistic().statistic_updata(update, f)
     context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
