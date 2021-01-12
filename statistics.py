@@ -18,21 +18,17 @@ class Datebase:
 class Statistic:
     logger = my_logging.get_logger(__name__)
 
-
     def statistic_updata(self, update, f):
-        user = update.message.chat.username
-        user_id = str(update.message.chat.id)
-        text = update.message.text
+        user = update.effective_user.username
+        user_id = str(update.effective_user.id)
         Statistic.logger.debug(f'Пользователь {user}, '
                                f'chat_id = {user_id}, '
-                               f'Выполнена функция - {f}, '
-                               f'текст_сообщения = {text}')
+                               f'Выполнена функция - {f}')
 
         msg = Message(api_key=os.environ['token_chatbase'],
                       platform="Telegram",
-                      version="0.1",
+                      version="0.2",
                       user_id=f"{user_id}",
-                      message=f"{text}",
                       intent=f"{f}")
         msg.send()
 
