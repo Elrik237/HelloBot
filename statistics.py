@@ -2,6 +2,8 @@ import os.path
 import my_logging
 import json
 from chatbase import Message
+import sqlite3
+import datetime
 
 
 class Datebase:
@@ -42,6 +44,21 @@ class Statistic:
         with open('file_users.json', 'w') as out:
             json.dump(Datebase.dict_users, out)
 
+        db = sqlite3.connect("click_statistics.db")
+        sql = db.cursor()
+
+        sql.execute("""CREATE TABLE IF NOT EXISTS click_statistics(
+            time TEXT, 
+            name TEXT,
+            user_id INTEGER)
+        """)
+        db.commit()
+
+        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+
+        db.execute("""INSERT INTO click_statistics VALUES(?,?,?);""", (time, f, user_id))
+        db.commit()
+
     def inline_statistic_updata(self, update, f):
         inline_user = update.inline_query.from_user.username
         inline_user_id = str(update.inline_query.from_user.id)
@@ -69,6 +86,21 @@ class Statistic:
         with open('file_users.json', 'w') as out:
             json.dump(Datebase.dict_users, out)
 
+        db = sqlite3.connect("click_statistics.db")
+        sql = db.cursor()
+
+        sql.execute("""CREATE TABLE IF NOT EXISTS click_statistics(
+                    time TEXT, 
+                    name TEXT,
+                    user_id INTEGER)
+                """)
+        db.commit()
+
+        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+
+        db.execute("""INSERT INTO click_statistics VALUES(?,?,?);""", (time, f, inline_user_id))
+        db.commit()
+
     def stat(self, update, context):
         f = 'stat'
         Statistic().statistic_updata(update, f)
@@ -78,5 +110,8 @@ class Statistic:
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=f'Количество уникальных пользователей: {len(Datebase.dict_users)}\n'
-                 f"{''.join(lens_user)}"
+                 f"{''.join(lens_user)}\n"
+                 f"Также статистика ведется на chatbase.com, для ознакомления с ней обратитесь к @Elrik237"
         )
+        with open('click_statistics.db', 'rb') as doc:
+            context.bot.sendDocument(chat_id=update.effective_chat.id, document=doc)
