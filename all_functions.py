@@ -147,22 +147,22 @@ def get_callback_from_button(update, context):
         context.bot.send_message(chat_id=139664901, text='Я отправил ваш ответ')
 
 
-time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
-
-
 def echo(update, context):
+    time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
     f = 'echo'
     Statistic().statistic_updata(update, f)
     context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text + ' ' + time)
 
 
 def time_now(update, context):
+    time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
     f = 'time_now'
     Statistic().statistic_updata(update, f)
     context.bot.send_message(chat_id=update.effective_chat.id, text=time)
 
 
 def inline_(update, context):
+    time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
     f = 'inlin_'
     Statistic().inline_statistic_updata(update, f)
 

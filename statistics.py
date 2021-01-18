@@ -79,7 +79,7 @@ class Statistic:
         if inline_user_id not in Datebase.dict_users:
             Datebase.dict_users[inline_user_id] = [inline_user, 1]
         else:
-            quantity_messages = int(Datebase.dict_users[inline_user_id][1])
+            quantity_messages = Datebase.dict_users[inline_user_id][1]
             quantity_messages += 1
             Datebase.dict_users[inline_user_id] = [inline_user, quantity_messages]
 
