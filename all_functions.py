@@ -1,6 +1,5 @@
 from telegram import InlineQueryResultArticle, InputTextMessageContent
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, ReplyKeyboardMarkup, \
-    KeyboardButton
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 import os
 import datetime
@@ -93,6 +92,7 @@ query_user_id = []
 
 
 def get_callback_from_button(update, context):
+    user_name = f'{update.effective_user.first_name} {update.effective_user.last_name}'
     user = update.effective_user.username
     user_id = update.effective_user.id
     query = update.callback_query
@@ -116,7 +116,7 @@ def get_callback_from_button(update, context):
     elif int(query.data) == 4:
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Я сообщил @Elrik237, что вы хотите сегодня встретиться!')
-        context.bot.send_message(chat_id=139664901, text=f'{user_id}:@{user} хочет сегодня выпить с вами кофе!',
+        context.bot.send_message(chat_id=139664901, text=f'{user_name} : @{user} хочет сегодня выпить с вами кофе!',
                                  reply_markup=markup1)
         query_user_id.insert(0, user_id)
 
@@ -124,7 +124,7 @@ def get_callback_from_button(update, context):
     elif int(query.data) == 5:
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Я сообщил @Elrik237, что вы хотите завтра встретиться!')
-        context.bot.send_message(chat_id=139664901, text=f'{user_id}:@{user} хочет завтра выпить с вами кофе!',
+        context.bot.send_message(chat_id=139664901, text=f'{user_name} : @{user} хочет завтра выпить с вами кофе!',
                                  reply_markup=markup1)
         query_user_id.insert(0, user_id)
 
@@ -132,7 +132,7 @@ def get_callback_from_button(update, context):
     elif int(query.data) == 6:
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Я сообщил @Elrik237, что вы хотите на выходных встретиться!')
-        context.bot.send_message(chat_id=139664901, text=f'{user_id}:@{user} хочет на выходных выпить с вами кофе!',
+        context.bot.send_message(chat_id=139664901, text=f'{user_name} : @{user} хочет на выходных выпить с вами кофе!',
                                  reply_markup=markup1)
         query_user_id.insert(0, user_id)
 
@@ -175,16 +175,7 @@ def inline_(update, context):
             input_message_content=InputTextMessageContent('Текущая дата и время: ' + time)
         )
     )
-    # results.append(
-    #     InlineQueryResultArticle(
-    #         id='2',
-    #         title='Пригласить на кофе',
-    #         description='Приглашает любого участника чата на кофе',
-    #         input_message_content=InputTextMessageContent('Когда Вы хотитие пригласить на кофе?'),
-    #         reply_markup=InlineKeyboardMarkup(keyboard)
-    #
-    #     )
-    # )
+
     context.bot.answer_inline_query(update.inline_query.id, results=results)
 
 
