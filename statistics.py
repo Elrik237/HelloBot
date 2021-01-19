@@ -2,8 +2,37 @@ import os.path
 import my_logging
 import json
 from chatbase import Message
-import sqlite3
 import datetime
+
+from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+engine = create_engine('sqlite:///click_statistics.db', echo=True)
+
+Base = declarative_base()
+
+
+class Click_statistics(Base):
+    __tablename__ = 'click_statistics'
+    id = Column(Integer, primary_key=True)
+    data = Column(String)
+    f_name = Column(String)
+    user_id = Column(Integer)
+
+    def __init__(self, data, f_name, user_id):
+        self.data = data
+        self.f_name = f_name
+        self.user_id = user_id
+
+    def __repr__(self):
+        return "<User('%s','%s', '%s')>" % (self.data, self.f_name, self.user_id)
+
+
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+session = Session()
+
 
 
 class Datebase:
@@ -44,20 +73,11 @@ class Statistic:
         with open('file_users.json', 'w') as out:
             json.dump(Datebase.dict_users, out)
 
-        db = sqlite3.connect("click_statistics.db")
-        sql = db.cursor()
-
-        sql.execute("""CREATE TABLE IF NOT EXISTS click_statistics(
-            time TEXT, 
-            name TEXT,
-            user_id INTEGER)
-        """)
-        db.commit()
-
         time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
 
-        db.execute("""INSERT INTO click_statistics VALUES(?,?,?);""", (time, f, user_id))
-        db.commit()
+        click_statistics = Click_statistics(time, f, user_id)
+        session.add(click_statistics)
+        session.commit()
 
     def inline_statistic_updata(self, update, f):
         inline_user = update.inline_query.from_user.username
@@ -86,20 +106,11 @@ class Statistic:
         with open('file_users.json', 'w') as out:
             json.dump(Datebase.dict_users, out)
 
-        db = sqlite3.connect("click_statistics.db")
-        sql = db.cursor()
-
-        sql.execute("""CREATE TABLE IF NOT EXISTS click_statistics(
-                    time TEXT, 
-                    name TEXT,
-                    user_id INTEGER)
-                """)
-        db.commit()
-
         time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
 
-        db.execute("""INSERT INTO click_statistics VALUES(?,?,?);""", (time, f, inline_user_id))
-        db.commit()
+        click_statistics = Click_statistics(time, f, inline_user_id)
+        session.add(click_statistics)
+        session.commit()
 
     def stat(self, update, context):
         f = 'stat'
