@@ -4,7 +4,7 @@ import os
 from statistics import Statistic
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, MessageHandler, Filters, CallbackQueryHandler
 
-logger = my_logging.get_logger(__name__)
+logger = my_logging.get_logger(__name__)  # TODO
 
 
 def main():
@@ -26,5 +26,5 @@ def main():
 
 
 if __name__ == '__main__':
-    my_logging.get_logger(__name__)
+    my_logging.get_logger(__name__) # TODO Посмотреть логер Гоши
     main()

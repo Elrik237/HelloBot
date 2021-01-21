@@ -1,3 +1,4 @@
+import logging
 import os.path
 import my_logging
 from chatbase import Message
@@ -6,12 +7,12 @@ from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///click_statistics.db', echo=None)
+engine = create_engine('sqlite:///click_statistics.db', echo=None) # TODO Перенести в конструктор Статистики
 
 Base = declarative_base()
 
 
-class Click_statistics(Base):
+class ClickStatistics(Base): # TODO Вынести в отдельный файл
     __tablename__ = 'click_statistics'
     id = Column(Integer, primary_key=True)
     data = Column(String)
@@ -33,22 +34,22 @@ class Click_statistics(Base):
 
 
 Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine) # TODO Перенести в фунцию апдейтер
 session = Session()
 
 
 class Statistic:
-    logger = my_logging.get_logger(__name__)
 
+# TODO Отдельные атрибуты для пользователя
     def statistic_updata(self, update, f):
         user_name = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user = update.effective_user.username
         user_id = str(update.effective_user.id)
-        Statistic.logger.debug(f'Пользователь {user}, '
+        logging.debug(f'Пользователь {user}, '
                                f'chat_id = {user_id}, '
                                f'Выполнена функция - {f}')
 
-        msg = Message(api_key=os.environ['token_chatbase'],
+        msg = Message(api_key=os.environ['token_chatbase'], # TODO Добавить в конструктор
                       platform="Telegram",
                       version="0.2",
                       user_id=f"{user_id}",
@@ -91,16 +92,16 @@ class Statistic:
 
         lens_user = {}
         list_ = []
-
-        for q in session.query(Click_statistics.user_id):
+# TODO Убрать индексы  (грой бай)
+        for q in session.query(Click_statistics.user_id): # TODO Дай мне уникальных пользователей по user_id дистинкт
             c = session.query(Click_statistics.user_id).filter(Click_statistics.user_id == q[0]).count()
-            for u_n in session.query(Click_statistics.user_name).filter(Click_statistics.user_id == q[0]):
-                for n in session.query(Click_statistics.username).filter(Click_statistics.user_id == q[0]):
+            for u_n in session.query(Click_statistics.user_name).filter(Click_statistics.user_id == q[0]): # Использовать только первую запись  first
+                for n in session.query(Click_statistics.username).filter(Click_statistics.user_id == q[0]): # Использовать только первую запись
                     if q[0] not in lens_user:
                         lens_user[q[0]] = [u_n[0], n[0], c]
                     else:
                         lens_user[q[0]] = [u_n[0], n[0], c]
-
+# TODO Сделать агрегацию данных здесь
         for k in lens_user:
             if lens_user[k][1] == None:
                 list_ += f'{k} : {lens_user[k][0]},\n Количество запросов {lens_user[k][2]}\n\n'

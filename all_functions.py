@@ -5,6 +5,7 @@ import os
 import datetime
 import my_logging
 from statistics import Statistic
+# TODO Переписать на класс, доьавить инициализацию бота
 
 logger = my_logging.get_logger(__name__)
 
@@ -16,7 +17,7 @@ else:
 
 def start(update, context):
     f = 'start'
-    Statistic().statistic_updata(update, f)
+    Statistic().statistic_updata(update, f)  # TODO Артрибут класса
     text = "%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n%s \n" % ("Привет, я бот который только начинает развиваться!",
                                                                    "Если не использовать команды ниже, "
                                                                    "я буду просто повторять Ваше сообщение(",
@@ -113,7 +114,7 @@ def get_callback_from_button(update, context):
         time_now(update, context)
     elif int(query.data) == 3:
         coffee(update, context)
-    elif int(query.data) == 4:
+    elif int(query.data) == 4: # TODO Добавить функцию "сегодня, завтра .."
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Я сообщил @Elrik237, что вы хотите сегодня встретиться!')
         context.bot.send_message(chat_id=139664901, text=f'{user_name} : @{user} хочет сегодня выпить с вами кофе!',
