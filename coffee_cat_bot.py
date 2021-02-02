@@ -48,6 +48,7 @@ class CoffeeCatBot:
         self.session = self.Session()
 
         self.query_user_id = []
+        self.date = []
 
     def start(self, update, context):
         f = 'start'
@@ -165,11 +166,8 @@ class CoffeeCatBot:
         elif int(query.data) == 4:
             chat('сегодня')
             date_today = datetime.datetime.now().strftime('%d/%m/%Y')
-
-            user_requests = UserRequests(user_id, user_name, user_fullname, date_today)
-            self.session.add(user_requests)
-            self.session.commit()
-            self.session.close()
+            self.date.clear()
+            self.date.append(date_today)
 
         elif int(query.data) == 5:
             chat('завтра')
@@ -177,31 +175,32 @@ class CoffeeCatBot:
             duration_minutes = datetime.timedelta(days=1)
             result = date_now + duration_minutes
             date_tomorrow = result.strftime('%d/%m/%Y')
-
-            user_requests = UserRequests(user_id, user_name, user_fullname, date_tomorrow)
-            self.session.add(user_requests)
-            self.session.commit()
-            self.session.close()
+            self.date.clear()
+            self.date.append(date_tomorrow)
 
         elif int(query.data) == 6:
             chat('на выходных')
             data = datetime.datetime.today().weekday()
-            data_week = 6 - data
+            data_week = 5 - data
             date_now = datetime.datetime.now()
             duration_minutes = datetime.timedelta(days=data_week)
             result = date_now + duration_minutes
+            duration_minutes_1 = datetime.timedelta(days=1)
+            result_1 = result + duration_minutes_1
+            date_weekday_2 = result_1.strftime('%d/%m/%Y')
             date_weekday = result.strftime('%d/%m/%Y')
-
-            user_requests = UserRequests(user_id, user_name, user_fullname, date_weekday)
-            self.session.add(user_requests)
-            self.session.commit()
-            self.session.close()
+            self.date.clear()
+            self.date.append(f'{date_weekday} - {date_weekday_2}')
 
         elif int(query.data) == 7:
             context.bot.send_message(chat_id=self.query_user_id[0],
                                      text='@Elrik237 готов с Вами встретиться!')
             context.bot.send_message(chat_id=139664901, text='Я отправил ваш ответ')
-            pass  # TODO
+
+            user_requests = UserRequests(user_id, user_name, user_fullname, self.date[0])
+            self.session.add(user_requests)
+            self.session.commit()
+            self.session.close()
 
         elif int(query.data) == 8:
             context.bot.send_message(chat_id=self.query_user_id[0],
@@ -258,11 +257,10 @@ class CoffeeCatBot:
         user_id = update.effective_user.id
         self.stat.statistic_updata(user_id, user_name, user_fullname, f)
         date_today = datetime.datetime.now().strftime('%d/%m/%Y')
-        for nearest_event in self.session.query(UserRequests).filter(UserRequests.data == date_today):
+        for nearest_event in self.session.query(UserRequests).filter(UserRequests.data == date_today).\
+                group_by(UserRequests.user_id):
             context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня '
                                                              f'запланирована встреча с {nearest_event.user_fullname}')
-
-
 
     def statistic(self, update, context):
         f = 'stat'
