@@ -7,7 +7,7 @@ from chatbase import Message
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models_clickstatistics import DeclarativeBase, ClickStatistics
+from models.clickstatistics import DeclarativeBase, ClickStatistics
 
 
 class Statistic:
@@ -19,9 +19,8 @@ class Statistic:
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
-        self.time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
-
     def statistic_updata(self, user_id, user_name, user_fullname, f):
+        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
         logging.debug(f'Пользователь {user_name}, '
                       f'chat_id = {user_id}, '
                       f'Выполнена функция - {f}')
@@ -33,12 +32,13 @@ class Statistic:
                       intent=f"{f}")
         msg.send()
 
-        click_statistics = ClickStatistics(self.time, f, user_id, user_name, user_fullname)
+        click_statistics = ClickStatistics(time, f, user_id, user_name, user_fullname)
         self.session.add(click_statistics)
         self.session.commit()
         self.session.close()
 
     def inline_statistic_updata(self, inline_user_id, inline_user_name, inline_user_fullname, query, f):
+        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
         logging.debug(f'Пользователь {inline_user_name}, '
                       f'chat_id = {inline_user_id}, '
                       f'Выполнена функция - {f}, '
@@ -52,7 +52,7 @@ class Statistic:
                       intent=f"{f}")
         msg.send()
 
-        click_statistics = ClickStatistics(self.time, f, inline_user_id, inline_user_name, inline_user_fullname)
+        click_statistics = ClickStatistics(time, f, inline_user_id, inline_user_name, inline_user_fullname)
         self.session.add(click_statistics)
         self.session.commit()
         self.session.close()
@@ -71,12 +71,10 @@ class Statistic:
             user_fullname = self.session.query(ClickStatistics.user_fullname).filter(
                 ClickStatistics.user_id == user_id.user_id).first()
 
-
-
             if user_name.user_name == None:
                 list += f'{user_id.user_id} : {user_fullname.user_fullname},\n ' \
-                         f'Количество запросов {count_query}\n\n'
+                        f'Количество запросов {count_query}\n\n'
             else:
                 list += f'{user_id.user_id} : {user_fullname.user_fullname} (@{user_name.user_name}),\n ' \
-                         f'Количество запросов {count_query}\n\n'
+                        f'Количество запросов {count_query}\n\n'
         return list

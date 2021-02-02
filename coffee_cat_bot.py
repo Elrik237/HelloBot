@@ -9,6 +9,11 @@ import datetime
 
 from statistics import Statistic
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from models.user_requests import DeclarativeBase, UserRequests
+
 
 class CoffeeCatBot:
     def __init__(self):
@@ -35,7 +40,13 @@ class CoffeeCatBot:
 
         self.updater.start_polling()
 
-        self.time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+        self.engine = create_engine('sqlite:///user_requests.db', echo=None)
+
+        DeclarativeBase.metadata.create_all(self.engine)
+
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
+
         self.query_user_id = []
 
     def start(self, update, context):
@@ -121,6 +132,7 @@ class CoffeeCatBot:
                                  reply_markup=markup)
 
     def get_callback_from_button(self, update, context):
+
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user_name = update.effective_user.username
         user_id = update.effective_user.id
@@ -152,14 +164,44 @@ class CoffeeCatBot:
             self.coffee(update, context)
         elif int(query.data) == 4:
             chat('сегодня')
+            date_today = datetime.datetime.now().strftime('%d/%m/%Y')
+
+            user_requests = UserRequests(user_id, user_name, user_fullname, date_today)
+            self.session.add(user_requests)
+            self.session.commit()
+            self.session.close()
+
         elif int(query.data) == 5:
             chat('завтра')
+            date_now = datetime.datetime.now()
+            duration_minutes = datetime.timedelta(days=1)
+            result = date_now + duration_minutes
+            date_tomorrow = result.strftime('%d/%m/%Y')
+
+            user_requests = UserRequests(user_id, user_name, user_fullname, date_tomorrow)
+            self.session.add(user_requests)
+            self.session.commit()
+            self.session.close()
+
         elif int(query.data) == 6:
             chat('на выходных')
+            data = datetime.datetime.today().weekday()
+            data_week = 6 - data
+            date_now = datetime.datetime.now()
+            duration_minutes = datetime.timedelta(days=data_week)
+            result = date_now + duration_minutes
+            date_weekday = result.strftime('%d/%m/%Y')
+
+            user_requests = UserRequests(user_id, user_name, user_fullname, date_weekday)
+            self.session.add(user_requests)
+            self.session.commit()
+            self.session.close()
+
         elif int(query.data) == 7:
             context.bot.send_message(chat_id=self.query_user_id[0],
                                      text='@Elrik237 готов с Вами встретиться!')
             context.bot.send_message(chat_id=139664901, text='Я отправил ваш ответ')
+            pass  # TODO
 
         elif int(query.data) == 8:
             context.bot.send_message(chat_id=self.query_user_id[0],
@@ -168,22 +210,29 @@ class CoffeeCatBot:
 
     def echo(self, update, context):
         f = 'echo'
+        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user_name = update.effective_user.username
         user_id = update.effective_user.id
         self.stat.statistic_updata(user_id, user_name, user_fullname, f)
-        context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text + ' ' + self.time)
+        if user_id == 139664901 and update.message.text == '?':
+            self.nearest_event(update, context)
+        else:
+            context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text + ' ' + time)
 
     def time_now(self, update, context):
         f = 'time_now'
+        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user_name = update.effective_user.username
         user_id = update.effective_user.id
         self.stat.statistic_updata(user_id, user_name, user_fullname, f)
-        context.bot.send_message(chat_id=update.effective_chat.id, text=self.time)
+
+        context.bot.send_message(chat_id=update.effective_chat.id, text=time)
 
     def inline_(self, update, context):
         f = 'inlin_'
+        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
         query = update.inline_query.query
         inline_user_fullname = f'{update.inline_query.from_user.first_name} {update.inline_query.from_user.last_name}'
         inline_user_name = update.inline_query.from_user.username
@@ -196,11 +245,24 @@ class CoffeeCatBot:
                 id='1',
                 title='Дата и время',
                 description='Выводит текущую дату и врумя',
-                input_message_content=InputTextMessageContent('Текущая дата и время: ' + self.time)
+                input_message_content=InputTextMessageContent('Текущая дата и время: ' + time)
             )
         )
 
         context.bot.answer_inline_query(update.inline_query.id, results=results)
+
+    def nearest_event(self, update, context):
+        f = 'nearest_event'
+        user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
+        user_name = update.effective_user.username
+        user_id = update.effective_user.id
+        self.stat.statistic_updata(user_id, user_name, user_fullname, f)
+        date_today = datetime.datetime.now().strftime('%d/%m/%Y')
+        for nearest_event in self.session.query(UserRequests).filter(UserRequests.data == date_today):
+            context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня '
+                                                             f'запланирована встреча с {nearest_event.user_fullname}')
+
+
 
     def statistic(self, update, context):
         f = 'stat'

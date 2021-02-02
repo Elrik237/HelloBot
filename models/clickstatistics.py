@@ -1,12 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
 
-
-class DeclarativeBase:
-    pass
-
-
-DeclarativeBase = declarative_base(cls=DeclarativeBase)
+from models import DeclarativeBase
 
 
 class ClickStatistics(DeclarativeBase):
@@ -21,6 +15,7 @@ class ClickStatistics(DeclarativeBase):
     def __init__(self, time, f_name, user_id, user_name, user_fullname):
         self.time = time
         self.f_name = f_name
+
         self.user_id = user_id
         self.user_name = user_name
         self.user_fullname = user_fullname
