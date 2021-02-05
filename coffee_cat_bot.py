@@ -257,10 +257,15 @@ class CoffeeCatBot:
         user_id = update.effective_user.id
         self.stat.statistic_updata(user_id, user_name, user_fullname, f)
         date_today = datetime.datetime.now().strftime('%d/%m/%Y')
-        for nearest_event in self.session.query(UserRequests).filter(UserRequests.data == date_today).\
-                group_by(UserRequests.user_id):
-            context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня '
-                                                             f'запланирована встреча с {nearest_event.user_fullname}')
+        q = self.session.query(UserRequests).filter(UserRequests.data == date_today). \
+            group_by(UserRequests.user_id)
+        if not q.first():
+            context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня ничего не запланированно')
+
+        else:
+            for nearest_event in q:
+                context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня '
+                                                                 f'запланирована встреча с {nearest_event.user_fullname}')
 
     def statistic(self, update, context):
         f = 'stat'
