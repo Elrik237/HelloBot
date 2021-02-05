@@ -1,3 +1,4 @@
+import pytz
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, \
     MessageHandler, Filters, CallbackQueryHandler
 from telegram import InlineQueryResultArticle, InputTextMessageContent
@@ -221,7 +222,8 @@ class CoffeeCatBot:
 
     def time_now(self, update, context):
         f = 'time_now'
-        time = datetime.datetime.now().strftime('%m/%d/%Y %H:%M')
+        time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
+
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user_name = update.effective_user.username
         user_id = update.effective_user.id
@@ -231,7 +233,7 @@ class CoffeeCatBot:
 
     def inline_(self, update, context):
         f = 'inlin_'
-        time = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+        time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
         query = update.inline_query.query
         inline_user_fullname = f'{update.inline_query.from_user.first_name} {update.inline_query.from_user.last_name}'
         inline_user_name = update.inline_query.from_user.username

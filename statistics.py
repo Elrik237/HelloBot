@@ -3,6 +3,7 @@ import logging
 import os
 import os.path
 
+import pytz
 from chatbase import Message
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -20,7 +21,7 @@ class Statistic:
         self.session = self.Session()
 
     def statistic_updata(self, user_id, user_name, user_fullname, f):
-        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+        time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
         logging.debug(f'Пользователь {user_name}, '
                       f'chat_id = {user_id}, '
                       f'Выполнена функция - {f}')
@@ -38,7 +39,7 @@ class Statistic:
         self.session.close()
 
     def inline_statistic_updata(self, inline_user_id, inline_user_name, inline_user_fullname, query, f):
-        time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
+        time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
         logging.debug(f'Пользователь {inline_user_name}, '
                       f'chat_id = {inline_user_id}, '
                       f'Выполнена функция - {f}, '
