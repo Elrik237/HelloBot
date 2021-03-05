@@ -212,7 +212,6 @@ class CoffeeCatBot:
     @catch_exceptions
     def echo(self, update, context):
         f = 'echo'
-        x = 3 / 0
         time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user_name = update.effective_user.username
