@@ -1,4 +1,6 @@
 import pytz
+import telegram
+
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, \
     MessageHandler, Filters, CallbackQueryHandler
 from telegram import InlineQueryResultArticle, InputTextMessageContent
@@ -14,6 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from models.user_requests import DeclarativeBase, UserRequests
+from telegram_ext import catch_exceptions
 
 
 class CoffeeCatBot:
@@ -21,6 +24,7 @@ class CoffeeCatBot:
         self.stat = Statistic()
         self.updater = Updater(token=os.environ['token_bot'], use_context=True)
         dp = self.updater.dispatcher
+        self.bot = telegram.Bot(os.environ['token_bot'])
 
         dp.add_handler(CommandHandler('start', self.start))
         dp.add_handler(CommandHandler('time_now', self.time_now))
@@ -31,13 +35,6 @@ class CoffeeCatBot:
         dp.add_handler(MessageHandler(Filters.text & (~Filters.command), self.echo))
         dp.add_handler(MessageHandler(Filters.command, self.unknown))
         dp.add_handler(InlineQueryHandler(self.inline_))
-
-        self.logger = logging.getLogger(__name__)
-
-        if os.environ.get('token_bot'):
-            self.logger.info('Погнали!')
-        else:
-            self.logger.info('Нужен token_bot. Добавь его или не буду работать!')
 
         self.updater.start_polling()
 
@@ -51,6 +48,7 @@ class CoffeeCatBot:
         self.query_user_id = []
         self.date = []
 
+    @catch_exceptions
     def start(self, update, context):
         f = 'start'
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
@@ -89,7 +87,7 @@ class CoffeeCatBot:
 
     def get_cat(self):
         try:
-            r = requests.get('http://thecatapi.com/api/images/get?format=src')
+            r = requests.get('https://thiscatdoesnotexist.com')
             url = r.url
         except:
             url = self.get_cat()
@@ -97,6 +95,7 @@ class CoffeeCatBot:
             pass
         return url
 
+    @catch_exceptions
     def send_cat(self, update, context):
         f = 'cat'
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
@@ -111,6 +110,7 @@ class CoffeeCatBot:
         keys = [[InlineKeyboardButton('🐈Еще котика?!🐈', callback_data='2')]]
         return InlineKeyboardMarkup(inline_keyboard=keys)
 
+    @catch_exceptions
     def coffee(self, update, context):
         f = 'coffee'
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
@@ -133,6 +133,7 @@ class CoffeeCatBot:
                                  text='Когда вы хотите пригласить @Elrik237 на кофе?',
                                  reply_markup=markup)
 
+    @catch_exceptions
     def get_callback_from_button(self, update, context):
 
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
@@ -208,8 +209,10 @@ class CoffeeCatBot:
                                      text='@Elrik237 не готов с Вами встретиться! Давайте запланируем другой день!')
             context.bot.send_message(chat_id=139664901, text='Я отправил ваш ответ')
 
+    @catch_exceptions
     def echo(self, update, context):
         f = 'echo'
+        x = 3 / 0
         time = datetime.datetime.today().strftime('%m/%d/%Y %H:%M')
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user_name = update.effective_user.username
@@ -220,6 +223,7 @@ class CoffeeCatBot:
         else:
             context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text + ' ' + time)
 
+    @catch_exceptions
     def time_now(self, update, context):
         f = 'time_now'
         time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
@@ -231,6 +235,7 @@ class CoffeeCatBot:
 
         context.bot.send_message(chat_id=update.effective_chat.id, text=time)
 
+    @catch_exceptions
     def inline_(self, update, context):
         f = 'inlin_'
         time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
@@ -252,6 +257,7 @@ class CoffeeCatBot:
 
         context.bot.answer_inline_query(update.inline_query.id, results=results)
 
+    @catch_exceptions
     def nearest_event(self, update, context):
         f = 'nearest_event'
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
@@ -269,6 +275,7 @@ class CoffeeCatBot:
                 context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня '
                                                                  f'запланирована встреча с {nearest_event.user_fullname}')
 
+    @catch_exceptions
     def statistic(self, update, context):
         f = 'stat'
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
@@ -282,6 +289,7 @@ class CoffeeCatBot:
                  f"Также статистика ведется на chatbase.com, для ознакомления с ней обратитесь к @Elrik237"
         )
 
+    @catch_exceptions
     def unknown(self, update, context):
         f = 'unknown'
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
@@ -290,3 +298,6 @@ class CoffeeCatBot:
         self.stat.statistic_updata(user_id, user_name, user_fullname, f)
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text="Sorry, I didn't understand that command.")
+
+    def send_error(self, message):
+        self.bot.send_message(chat_id=139664901, text=f'Произошла ошибка: {message}')
