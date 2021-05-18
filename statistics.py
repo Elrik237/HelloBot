@@ -5,20 +5,14 @@ import os.path
 
 import pytz
 from chatbase import Message
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-from models.clickstatistics import DeclarativeBase, ClickStatistics
+import requests
 
 
 class Statistic:
     def __init__(self):
-        self.engine = create_engine('sqlite:///click_statistics.db', echo=None)
-
-        DeclarativeBase.metadata.create_all(self.engine)
-
-        self.Session = sessionmaker(bind=self.engine)
-        self.session = self.Session()
+        self.token_bd = os.environ['token_bd']
+        self.url_bd = "http://89.223.90.206:8000/click_statistics/"
 
     def statistic_updata(self, user_id, user_name, user_fullname, f):
         time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
@@ -33,10 +27,14 @@ class Statistic:
                       intent=f"{f}")
         msg.send()
 
-        click_statistics = ClickStatistics(time, f, user_id, user_name, user_fullname)
-        self.session.add(click_statistics)
-        self.session.commit()
-        self.session.close()
+        if user_name is None:
+            data = {'time': time, 'f_name': f, 'user_id': user_id, 'user_name': 'None',
+                    'user_fullname': user_fullname}
+            requests.post(self.url_bd, data=data, headers={'Authorization': 'Token {}'.format(self.token_bd)})
+        else:
+            data = {'time': time, 'f_name': f, 'user_id': user_id, 'user_name': user_name,
+                    'user_fullname': user_fullname}
+            requests.post(self.url_bd, data=data, headers={'Authorization': 'Token {}'.format(self.token_bd)})
 
     def inline_statistic_updata(self, inline_user_id, inline_user_name, inline_user_fullname, query, f):
         time = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime('%m/%d/%Y %H:%M')
@@ -53,29 +51,40 @@ class Statistic:
                       intent=f"{f}")
         msg.send()
 
-        click_statistics = ClickStatistics(time, f, inline_user_id, inline_user_name, inline_user_fullname)
-        self.session.add(click_statistics)
-        self.session.commit()
-        self.session.close()
+        if inline_user_name is None:
+            data = {'time': time, 'f_name': f, 'user_id': inline_user_id,
+                    'user_name': 'None', 'user_fullname': inline_user_fullname}
+            requests.post(self.url_bd, data=data, headers={'Authorization': 'Token {}'.format(self.token_bd)})
+        else:
+            data = {'time': time, 'f_name': f, 'user_id': inline_user_id,
+                    'user_name': inline_user_name, 'user_fullname': inline_user_fullname}
+            requests.post(self.url_bd, data=data, headers={'Authorization': 'Token {}'.format(self.token_bd)})
 
     def stat(self):
 
+        response = requests.get(self.url_bd, headers={"Authorization": "Token {}".format(self.token_bd)})
+        data = response.json()
+        users = {}
         list = []
-        count_user = self.session.query(ClickStatistics.user_id).group_by(ClickStatistics.user_id).count()
+
+        for i in range(0, (data['count'])):
+            user_id = data['results'][i]["user_id"]
+            if user_id not in users:
+                users[user_id] = [data['results'][i]["user_fullname"], data['results'][i]["user_name"], 1]
+            else:
+                count = users[data['results'][i]["user_id"]][2]
+                count += 1
+                users[user_id] = [data['results'][i]["user_fullname"], data['results'][i]["user_name"], count]
+
+        count_user = len(users)
         list += f'Количество уникальных пользователей: {count_user}\n\n'
 
-        for user_id in self.session.query(ClickStatistics.user_id).distinct():
-            count_query = self.session.query(ClickStatistics). \
-                filter(ClickStatistics.user_id == user_id.user_id).count()
-            user_name = self.session.query(ClickStatistics.user_name).filter(
-                ClickStatistics.user_id == user_id.user_id).first()
-            user_fullname = self.session.query(ClickStatistics.user_fullname).filter(
-                ClickStatistics.user_id == user_id.user_id).first()
-
-            if user_name.user_name == None:
-                list += f'{user_id.user_id} : {user_fullname.user_fullname},\n ' \
-                        f'Количество запросов {count_query}\n\n'
+        for id in users.keys():
+            if users[id][0] is None:
+                list += f'{id} : {users[id][0]},\n ' \
+                        f'Количество запросов {users[id][2]}\n\n'
             else:
-                list += f'{user_id.user_id} : {user_fullname.user_fullname} (@{user_name.user_name}),\n ' \
-                        f'Количество запросов {count_query}\n\n'
+                list += f"{id} : {users[id][0]}, (@{users[id][1]})\n " \
+                        f'Количество запросов {users[id][2]}\n\n'
+
         return list

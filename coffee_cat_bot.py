@@ -11,11 +11,6 @@ import os
 import datetime
 
 from statistics import Statistic
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from models.user_requests import DeclarativeBase, UserRequests
 from telegram_ext import catch_exceptions
 
 
@@ -38,14 +33,12 @@ class CoffeeCatBot:
 
         self.updater.start_polling()
 
-        self.engine = create_engine('sqlite:///user_requests.db', echo=None)
-
-        DeclarativeBase.metadata.create_all(self.engine)
-
-        self.Session = sessionmaker(bind=self.engine)
-        self.session = self.Session()
+        self.token_bd = os.environ['token_bd']
+        self.url_bd = "http://89.223.90.206:8000/user_requests/"
 
         self.query_user_id = []
+        self.query_user_name = []
+        self.query_user_fullname = []
         self.date = []
 
     @catch_exceptions
@@ -87,7 +80,7 @@ class CoffeeCatBot:
 
     def get_cat(self):
         try:
-            r = requests.get('https://thiscatdoesnotexist.com')
+            r = requests.get('http://thecatapi.com/api/images/get?format=src')
             url = r.url
         except:
             url = self.get_cat()
@@ -107,7 +100,7 @@ class CoffeeCatBot:
                               reply_markup=self.draw_button())
 
     def draw_button(self):
-        keys = [[InlineKeyboardButton('🐈Еще котика?!🐈', callback_data='2')]]
+        keys = [[InlineKeyboardButton('Еще котика?!', callback_data='2')]]
         return InlineKeyboardMarkup(inline_keyboard=keys)
 
     @catch_exceptions
@@ -139,6 +132,7 @@ class CoffeeCatBot:
         user_fullname = f'{update.effective_user.first_name} {update.effective_user.last_name}'
         user_name = update.effective_user.username
         user_id = update.effective_user.id
+
         query = update.callback_query
 
         keyboard2 = [
@@ -157,7 +151,10 @@ class CoffeeCatBot:
             context.bot.send_message(chat_id=139664901,
                                      text=f'{user_fullname} : @{user_name} хочет {day} выпить с вами кофе!',
                                      reply_markup=markup1)
+
             self.query_user_id.insert(0, user_id)
+            self.query_user_name.insert(0, user_name)
+            self.query_user_fullname.insert(0, user_fullname)
 
         if int(query.data) == 2:
             self.send_cat(update, context)
@@ -182,8 +179,8 @@ class CoffeeCatBot:
 
         elif int(query.data) == 6:
             chat('на выходных')
-            data = datetime.datetime.today().weekday()
-            data_week = 5 - data
+            data_time = datetime.datetime.today().weekday()
+            data_week = 5 - data_time
             date_now = datetime.datetime.now()
             duration_minutes = datetime.timedelta(days=data_week)
             result = date_now + duration_minutes
@@ -199,10 +196,14 @@ class CoffeeCatBot:
                                      text='@Elrik237 готов с Вами встретиться!')
             context.bot.send_message(chat_id=139664901, text='Я отправил ваш ответ')
 
-            user_requests = UserRequests(user_id, user_name, user_fullname, self.date[0])
-            self.session.add(user_requests)
-            self.session.commit()
-            self.session.close()
+            if self.query_user_name[0] is None:
+                data = {'user_id': self.query_user_id[0], 'user_name': 'None',
+                        'user_fullname': self.query_user_fullname[0], 'time': self.date[0]}
+                requests.post(self.url_bd, data=data, headers={'Authorization': 'Token {}'.format(self.token_bd)})
+            else:
+                data = {'user_id': self.query_user_id[0], 'user_name': self.query_user_name[0],
+                        'user_fullname': self.query_user_fullname[0], 'time': self.date[0]}
+                requests.post(self.url_bd, data=data, headers={'Authorization': 'Token {}'.format(self.token_bd)})
 
         elif int(query.data) == 8:
             context.bot.send_message(chat_id=self.query_user_id[0],
@@ -264,15 +265,15 @@ class CoffeeCatBot:
         user_id = update.effective_user.id
         self.stat.statistic_updata(user_id, user_name, user_fullname, f)
         date_today = datetime.datetime.now().strftime('%d/%m/%Y')
-        q = self.session.query(UserRequests).filter(UserRequests.data == date_today). \
-            group_by(UserRequests.user_id)
-        if not q.first():
-            context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня ничего не запланированно')
 
-        else:
-            for nearest_event in q:
+        response = requests.get(self.url_bd, headers={"Authorization": "Token {}".format(self.token_bd)})
+        data = response.json()
+        for i in range(0, (data['count'])):
+            if data['results'][i]["time"] == date_today:
                 context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня '
-                                                                 f'запланирована встреча с {nearest_event.user_fullname}')
+                                                                 f'запланирована встреча с {user_fullname}')
+            else:
+                context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня ничего не запланированно')
 
     @catch_exceptions
     def statistic(self, update, context):
