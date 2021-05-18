@@ -268,12 +268,14 @@ class CoffeeCatBot:
 
         response = requests.get(self.url_bd, headers={"Authorization": "Token {}".format(self.token_bd)})
         data = response.json()
-        for i in range(0, (data['count'])):
-            if data['results'][i]["time"] == date_today:
+        number = 0
+        for i in data:
+            if i["time"] == date_today:
                 context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня '
-                                                                 f'запланирована встреча с {user_fullname}')
-            else:
-                context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня ничего не запланированно')
+                                                                 f'запланирована встреча с {i["user_fullname"]}')
+                number += 1
+        if number == 0:
+            context.bot.send_message(chat_id=139664901, text=f'У Вас на сегодня ничего не запланированно')
 
     @catch_exceptions
     def statistic(self, update, context):

@@ -67,14 +67,14 @@ class Statistic:
         users = {}
         list = []
 
-        for i in range(0, (data['count'])):
-            user_id = data['results'][i]["user_id"]
+        for i in data:
+            user_id = i['user_id']
             if user_id not in users:
-                users[user_id] = [data['results'][i]["user_fullname"], data['results'][i]["user_name"], 1]
+                users[user_id] = [i['user_fullname'], i['user_name'], 1]
             else:
-                count = users[data['results'][i]["user_id"]][2]
+                count = users[i["user_id"]][2]
                 count += 1
-                users[user_id] = [data['results'][i]["user_fullname"], data['results'][i]["user_name"], count]
+                users[user_id] = [i['user_fullname'], i['user_name'], count]
 
         count_user = len(users)
         list += f'Количество уникальных пользователей: {count_user}\n\n'
