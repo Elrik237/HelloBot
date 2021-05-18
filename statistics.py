@@ -11,7 +11,7 @@ import requests
 
 class Statistic:
     def __init__(self):
-        self.token_bd = os.environ['token_bd']
+        self.token_bd = os.environ['token_db']
         self.url_bd = "http://89.223.90.206:8000/click_statistics/"
 
     def statistic_updata(self, user_id, user_name, user_fullname, f):

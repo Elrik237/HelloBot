@@ -33,7 +33,7 @@ class CoffeeCatBot:
 
         self.updater.start_polling()
 
-        self.token_bd = os.environ['token_bd']
+        self.token_bd = os.environ['token_db']
         self.url_bd = "http://89.223.90.206:8000/user_requests/"
 
         self.query_user_id = []
